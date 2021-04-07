@@ -193,7 +193,7 @@ class ImageClassificationData(DataModule):
     """Data module for image classification tasks."""
 
     preprocess_cls = ImageClassificationPreprocess
-    image_size = (196, 196)
+    image_size: Tuple[int, int] = (196, 196)
 
     def __init__(
         self,
@@ -211,7 +211,7 @@ class ImageClassificationData(DataModule):
     ) -> 'ImageClassificationData':
         """Creates a ImageClassificationData object from lists of image filepaths and labels"""
 
-        if train_dataset is not None and train_split is not None or val_split is not None or test_split is not None:
+        if train_dataset is not None and train_split is not None or val_split is not None and test_split is not None:
             train_dataset, val_dataset, test_dataset = self.train_val_test_split(
                 train_dataset, train_split, val_split, test_split, seed
             )

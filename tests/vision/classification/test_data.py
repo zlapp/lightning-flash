@@ -11,89 +11,120 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Tuple
+import pytest
+
 import os
 from pathlib import Path
 
 import numpy as np
-import torch
 from PIL import Image
+
+import torch
+import kornia as K
 
 from flash.data.data_utils import labels_from_categorical_csv
 from flash.vision import ImageClassificationData
 
 
-def _dummy_image_loader(_):
-    return torch.rand(3, 196, 196)
+def _rand_image(size: Tuple[int, int]=None):
+    if size is None:
+        _size = np.random.choice([196, 244])
+        size = (_size, _size)
+    return Image.fromarray(np.random.randint(0, 255, (*size, 3), dtype="uint8"))
 
 
-def _rand_image():
-    _size = np.random.choice([196, 244])
-    return Image.fromarray(np.random.randint(0, 255, (_size, _size, 3), dtype="uint8"))
-
-
-def test_from_filepaths(tmpdir):
+def test_from_filepaths_smoke(tmpdir):
     tmpdir = Path(tmpdir)
+
+    img_size: Tuple[int, int] = 12, 33  # height, width
+    B = 2  # batch_size
 
     (tmpdir / "a").mkdir()
     (tmpdir / "b").mkdir()
-    _rand_image().save(tmpdir / "a" / "a_1.png")
-    _rand_image().save(tmpdir / "a" / "a_2.png")
+    _rand_image(img_size).save(tmpdir / "a" / "a_1.png")
+    _rand_image(img_size).save(tmpdir / "a" / "a_2.png")
 
-    _rand_image().save(tmpdir / "b" / "a_1.png")
-    _rand_image().save(tmpdir / "b" / "a_2.png")
+    _rand_image(img_size).save(tmpdir / "b" / "a_1.png")
+    _rand_image(img_size).save(tmpdir / "b" / "a_2.png")
 
     img_data = ImageClassificationData.from_filepaths(
         train_filepaths=[tmpdir / "a", tmpdir / "b"],
         train_transform=None,
         train_labels=[0, 1],
-        batch_size=2,
+        batch_size=B,
         num_workers=0,
     )
     data = next(iter(img_data.train_dataloader()))
     imgs, labels = data
-    assert imgs.shape == (2, 3, 196, 196)
-    assert labels.shape == (2, )
+
+    # default image size is 196
+    out_size: Tuple[int, int] = img_data.image_size
+    H, W = out_size
+
+    assert imgs.shape == (B, 3, H, W)
+    assert labels.shape == (B, )
 
     assert img_data.val_dataloader() is None
     assert img_data.test_dataloader() is None
 
+
+@pytest.mark.parametrize("img_shape", [(1, 3, 24, 33), (2, 3, 12, 21)])
+@pytest.mark.parametrize("val_split", [None, 0.3])
+def test_from_filepaths_params(tmpdir, img_shape, val_split):
+    tmpdir = Path(tmpdir)
+
+    B, C, H, W = img_shape
+    img_size: Tuple[int, int] = H, W
+
     (tmpdir / "c").mkdir()
     (tmpdir / "d").mkdir()
-    _rand_image().save(tmpdir / "c" / "c_1.png")
-    _rand_image().save(tmpdir / "c" / "c_2.png")
-    _rand_image().save(tmpdir / "d" / "d_1.png")
-    _rand_image().save(tmpdir / "d" / "d_2.png")
+    _rand_image(img_size).save(tmpdir / "c" / "c_1.png")
+    _rand_image(img_size).save(tmpdir / "c" / "c_2.png")
+    _rand_image(img_size).save(tmpdir / "d" / "d_1.png")
+    _rand_image(img_size).save(tmpdir / "d" / "d_2.png")
 
     (tmpdir / "e").mkdir()
     (tmpdir / "f").mkdir()
-    _rand_image().save(tmpdir / "e" / "e_1.png")
-    _rand_image().save(tmpdir / "e" / "e_2.png")
-    _rand_image().save(tmpdir / "f" / "f_1.png")
-    _rand_image().save(tmpdir / "f" / "f_2.png")
+    _rand_image(img_size).save(tmpdir / "e" / "e_1.png")
+    _rand_image(img_size).save(tmpdir / "e" / "e_2.png")
+    _rand_image(img_size).save(tmpdir / "f" / "f_1.png")
+    _rand_image(img_size).save(tmpdir / "f" / "f_2.png")
+
+    def preprocess(x):
+        out =  K.image_to_tensor(np.array(x))
+        return out
+
+    _to_tensor = {
+        "pre_tensor_transform": lambda x: preprocess(x),
+    }
 
     img_data = ImageClassificationData.from_filepaths(
         train_filepaths=[tmpdir / "a", tmpdir / "b"],
         train_labels=[0, 1],
-        train_transform=None,
         val_filepaths=[tmpdir / "c", tmpdir / "d"],
         val_labels=[0, 1],
-        val_transform=None,
-        test_transform=None,
+        train_transform=_to_tensor,
+        val_transform=_to_tensor,
+        test_transform=_to_tensor,
         test_filepaths=[tmpdir / "e", tmpdir / "f"],
         test_labels=[0, 1],
-        batch_size=1,
+        batch_size=B,
         num_workers=0,
+        val_split=val_split,
     )
+    assert img_data.val_dataloader() is not None
+    assert img_data.test_dataloader() is not None
 
     data = next(iter(img_data.val_dataloader()))
     imgs, labels = data
-    assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1, )
+    assert imgs.shape == (B, 3, H, W)
+    assert labels.shape == (B, )
 
     data = next(iter(img_data.test_dataloader()))
     imgs, labels = data
-    assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1, )
+    assert imgs.shape == (B, 3, H, W)
+    assert labels.shape == (B, )
 
 
 def test_categorical_csv_labels(tmpdir):
