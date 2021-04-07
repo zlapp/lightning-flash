@@ -12,6 +12,7 @@ Lightning Flash
 
    quickstart
    installation
+   new_features
    custom_task
    reference/flash_to_pl
 

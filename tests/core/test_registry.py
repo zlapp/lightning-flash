@@ -56,6 +56,9 @@ def test_registry(tmpdir):
     backbones(my_model, name="cho", namespace="timm", type="densenet")
     backbones(my_model, name="cho", namespace="timm", type="alexnet")
 
+    import pdb
+    pdb.set_trace()
+
     registered_function = backbones.get("cho", with_metadata=True, type="resnet", namespace="timm")
     assert registered_function["name"] == "cho"
     assert registered_function["metadata"] == {"namespace": "timm", "type": "resnet"}
