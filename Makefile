@@ -1,16 +1,17 @@
-.PHONY: test clean docs
+.PHONY: test test-lf clean docs
 
 # assume you have installed need packages
 export SPHINX_MOCK_REQUIREMENTS=1
 
-test: clean
-	pip install -r requirements.txt
-	pip install -r requirements/test.txt
+test: #clean
 	# install APEX, see https://github.com/NVIDIA/apex#linux
 
 	# use this to run tests
 	python -m coverage run --source flash -m pytest flash tests -v --flake8
 	python -m coverage report
+
+test-lf:
+	pytest flash tests -v --flake8 --lf
 
 docs: clean
 	pip install --quiet -r requirements/docs.txt

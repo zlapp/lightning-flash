@@ -11,23 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Tuple
-import pytest
-
 import os
 from pathlib import Path
+from typing import Tuple
 
-import numpy as np
-from PIL import Image
-
-import torch
 import kornia as K
+import numpy as np
+import pytest
+import torch
+from PIL import Image
 
 from flash.data.data_utils import labels_from_categorical_csv
 from flash.vision import ImageClassificationData
 
 
-def _rand_image(size: Tuple[int, int]=None):
+def _rand_image(size: Tuple[int, int] = None):
     if size is None:
         _size = np.random.choice([196, 244])
         size = (_size, _size)
@@ -37,7 +35,7 @@ def _rand_image(size: Tuple[int, int]=None):
 def test_from_filepaths_smoke(tmpdir):
     tmpdir = Path(tmpdir)
 
-    img_size: Tuple[int, int] = 12, 33  # height, width
+    img_size: Tuple[int, int] = 196, 196  # height, width
     B = 2  # batch_size
 
     (tmpdir / "a").mkdir()
@@ -92,7 +90,7 @@ def test_from_filepaths_params(tmpdir, img_shape, val_split):
     _rand_image(img_size).save(tmpdir / "f" / "f_2.png")
 
     def preprocess(x):
-        out =  K.image_to_tensor(np.array(x))
+        out = K.image_to_tensor(np.array(x))
         return out
 
     _to_tensor = {

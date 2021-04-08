@@ -28,7 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Added `RetinaNet` & `backbones` to `ObjectDetector` Task ([#121](https://github.com/PyTorchLightning/lightning-flash/pull/121))
-- Added .csv image loading utils ([#116](https://github.com/PyTorchLightning/lightning-flash/pull/116), 
+- Added .csv image loading utils ([#116](https://github.com/PyTorchLightning/lightning-flash/pull/116),
     [#117](https://github.com/PyTorchLightning/lightning-flash/pull/117),
     [#118](https://github.com/PyTorchLightning/lightning-flash/pull/118))
 
