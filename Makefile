@@ -3,7 +3,9 @@
 # assume you have installed need packages
 export SPHINX_MOCK_REQUIREMENTS=1
 
-test: #clean
+test: clean
+	pip install -q -r requirements.txt
+	pip install -q -r requirements/test.txt
 	# install APEX, see https://github.com/NVIDIA/apex#linux
 
 	# use this to run tests
