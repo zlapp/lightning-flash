@@ -61,7 +61,7 @@ def test_from_filepaths_smoke(tmpdir):
     H, W = out_size
 
     assert imgs.shape == (B, 3, H, W)
-    assert labels.shape == (B)
+    assert labels.shape == (B, )
 
     assert img_data.val_dataloader() is None
     assert img_data.test_dataloader() is None
@@ -117,12 +117,12 @@ def test_from_filepaths_params(tmpdir, img_shape, val_split):
     data = next(iter(img_data.val_dataloader()))
     imgs, labels = data
     assert imgs.shape == (B, 3, H, W)
-    assert labels.shape == (B)
+    assert labels.shape == (B, )
 
     data = next(iter(img_data.test_dataloader()))
     imgs, labels = data
     assert imgs.shape == (B, 3, H, W)
-    assert labels.shape == (B)
+    assert labels.shape == (B, )
 
 
 def test_categorical_csv_labels(tmpdir):
@@ -211,7 +211,7 @@ def test_from_folders(tmpdir):
     data = next(iter(img_data.train_dataloader()))
     imgs, labels = data
     assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1)
+    assert labels.shape == (1, )
 
     assert img_data.val_dataloader() is None
     assert img_data.test_dataloader() is None
@@ -227,9 +227,9 @@ def test_from_folders(tmpdir):
     data = next(iter(img_data.val_dataloader()))
     imgs, labels = data
     assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1)
+    assert labels.shape == (1, )
 
     data = next(iter(img_data.test_dataloader()))
     imgs, labels = data
     assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1)
+    assert labels.shape == (1, )
