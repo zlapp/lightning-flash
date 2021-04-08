@@ -35,7 +35,7 @@ def _rand_image(size: Tuple[int, int] = None):
 def test_from_filepaths_smoke(tmpdir):
     tmpdir = Path(tmpdir)
 
-    img_size: Tuple[int, int] = 196, 196  # height, width
+    img_size: Tuple[int, int] = (196, 196)  # height, width
     B = 2  # batch_size
 
     (tmpdir / "a").mkdir()
@@ -61,7 +61,7 @@ def test_from_filepaths_smoke(tmpdir):
     H, W = out_size
 
     assert imgs.shape == (B, 3, H, W)
-    assert labels.shape == (B, )
+    assert labels.shape == (B)
 
     assert img_data.val_dataloader() is None
     assert img_data.test_dataloader() is None
@@ -73,7 +73,7 @@ def test_from_filepaths_params(tmpdir, img_shape, val_split):
     tmpdir = Path(tmpdir)
 
     B, C, H, W = img_shape
-    img_size: Tuple[int, int] = H, W
+    img_size: Tuple[int, int] = (H, W)
 
     (tmpdir / "c").mkdir()
     (tmpdir / "d").mkdir()
@@ -117,12 +117,12 @@ def test_from_filepaths_params(tmpdir, img_shape, val_split):
     data = next(iter(img_data.val_dataloader()))
     imgs, labels = data
     assert imgs.shape == (B, 3, H, W)
-    assert labels.shape == (B, )
+    assert labels.shape == (B)
 
     data = next(iter(img_data.test_dataloader()))
     imgs, labels = data
     assert imgs.shape == (B, 3, H, W)
-    assert labels.shape == (B, )
+    assert labels.shape == (B)
 
 
 def test_categorical_csv_labels(tmpdir):
@@ -211,7 +211,7 @@ def test_from_folders(tmpdir):
     data = next(iter(img_data.train_dataloader()))
     imgs, labels = data
     assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1, )
+    assert labels.shape == (1)
 
     assert img_data.val_dataloader() is None
     assert img_data.test_dataloader() is None
@@ -227,9 +227,9 @@ def test_from_folders(tmpdir):
     data = next(iter(img_data.val_dataloader()))
     imgs, labels = data
     assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1, )
+    assert labels.shape == (1)
 
     data = next(iter(img_data.test_dataloader()))
     imgs, labels = data
     assert imgs.shape == (1, 3, 196, 196)
-    assert labels.shape == (1, )
+    assert labels.shape == (1)
